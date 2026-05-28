@@ -1,11 +1,10 @@
 
   # Plataforma de Adoção de Animais
 
-  This is a code bundle for Plataforma de Adoção de Animais. The original project is available at https://www.figma.com/design/E1F0TCo7KOY84obb4vtc5V/Plataforma-de-Ado%C3%A7%C3%A3o-de-Animais.
 
-  ## Running the code
+  ## Para rodar o código
 
-  Run `npm i` to install the dependencies.
+  Run `npm i` pra instalar as dependências.
 
-  Run `npm run dev` to start the development server.
+  Run `npm run dev` pra iniciar o server.
   
