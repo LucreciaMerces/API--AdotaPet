@@ -1,0 +1,41 @@
+// ──────────────────────────────────────────────────────────────────────────────
+//  AdotaPet — Prisma Schema
+//
+//  Este arquivo define a conexão com o banco de dados e o generator do cliente.
+//  Os MODELOS serão adicionados no Sprint 2 (Modelagem do Banco).
+//
+//  Comandos úteis:
+//    npx prisma generate          → gera o PrismaClient tipado
+//    npx prisma migrate dev       → cria e aplica uma migration em dev
+//    npx prisma migrate deploy    → aplica migrations pendentes em produção
+//    npx prisma studio            → abre o painel visual do banco
+//    npx prisma db seed           → executa prisma/seed.ts
+// ──────────────────────────────────────────────────────────────────────────────
+
+
+// ──────────────────────────────────────────────────────────────────────────────
+//  MODELOS (Sprint 2)
+//
+//  Serão adicionados aqui:
+//    model User      { ... }
+//    model Animal    { ... }
+//    model Adoption  { ... }
+//    model Favorite  { ... }
+//    model Image     { ... }
+// ──────────────────────────────────────────────────────────────────────────────
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  nome      String
+  email     String   @unique
+  senha     String
+  createdAt DateTime @default(now())
+}
