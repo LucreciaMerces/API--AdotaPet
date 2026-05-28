@@ -1,28 +1,3 @@
-// ──────────────────────────────────────────────────────────────────────────────
-//  AdotaPet — Prisma Schema
-//
-//  Este arquivo define a conexão com o banco de dados e o generator do cliente.
-//  Os MODELOS serão adicionados no Sprint 2 (Modelagem do Banco).
-//
-//  Comandos úteis:
-//    npx prisma generate          → gera o PrismaClient tipado
-//    npx prisma migrate dev       → cria e aplica uma migration em dev
-//    npx prisma migrate deploy    → aplica migrations pendentes em produção
-//    npx prisma studio            → abre o painel visual do banco
-//    npx prisma db seed           → executa prisma/seed.ts
-// ──────────────────────────────────────────────────────────────────────────────
-
-
-// ──────────────────────────────────────────────────────────────────────────────
-//  MODELOS (Sprint 2)
-//
-//  Serão adicionados aqui:
-//    model User      { ... }
-//    model Animal    { ... }
-//    model Adoption  { ... }
-//    model Favorite  { ... }
-//    model Image     { ... }
-// ──────────────────────────────────────────────────────────────────────────────
 generator client {
   provider = "prisma-client-js"
 }
@@ -32,10 +7,145 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  ADOPTER
+  NGO
+  ADMIN
+}
+
+enum AdoptionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+enum AnimalStatus {
+  AVAILABLE
+  PENDING
+  ADOPTED
+}
+
+enum AnimalSpecies {
+  DOG
+  CAT
+  BIRD
+  RABBIT
+  OTHER
+}
+
+enum AnimalSize {
+  SMALL
+  MEDIUM
+  LARGE
+}
+
+enum AnimalGender {
+  MALE
+  FEMALE
+}
+
 model User {
-  id        Int      @id @default(autoincrement())
-  nome      String
+  id        String   @id @default(cuid())
   email     String   @unique
-  senha     String
+  name      String
+  password  String
+  role      UserRole @default(ADOPTER)
+
+  phone     String?
+  bio       String?
+  city      String?
+  state     String?
+  avatarUrl String?
+
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  animals   Animal[]
+  adoptions Adoption[]
+  favorites Favorite[]
+
+  @@index([email])
+  @@index([role])
+  @@map("users")
+}
+
+model Animal {
+  id           String        @id @default(cuid())
+  name         String
+  species      AnimalSpecies
+  breed        String?
+  age          Int?
+  gender       AnimalGender
+  size         AnimalSize
+  description  String?
+  status       AnimalStatus  @default(AVAILABLE)
+  isVaccinated Boolean       @default(false)
+  isNeutered   Boolean       @default(false)
+
+  ngoId String
+  ngo   User @relation(fields: [ngoId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  images    Image[]
+  adoptions Adoption[]
+  favorites Favorite[]
+
+  @@index([status])
+  @@index([species])
+  @@index([ngoId])
+  @@map("animals")
+}
+
+model Adoption {
+  id          String         @id @default(cuid())
+  status      AdoptionStatus @default(PENDING)
+  message     String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  resolvedAt  DateTime?
+
+  adopterId String
+  adopter   User @relation(fields: [adopterId], references: [id], onDelete: Cascade)
+
+  animalId String
+  animal   Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
+
+  @@index([adopterId])
+  @@index([animalId])
+  @@index([status])
+  @@map("adoptions")
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  animalId String
+  animal   Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, animalId])
+  @@index([userId])
+  @@map("favorites")
+}
+
+model Image {
+  id        String   @id @default(cuid())
+  url       String
+  key       String   @unique
+  isPrimary Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+
+  animalId String?
+  animal   Animal? @relation(fields: [animalId], references: [id], onDelete: Cascade)
+
+  @@index([animalId])
+  @@map("images")
 }
