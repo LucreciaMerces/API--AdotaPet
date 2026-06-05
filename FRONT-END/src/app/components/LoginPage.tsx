@@ -206,7 +206,7 @@ export function LoginPage({ onLogin }: LoginPageProps) {
                 type="submit"
                 className="w-full py-4 rounded-xl bg-gradient-to-r from-orange-500 via-pink-500 to-purple-500 text-white shadow-xl hover:shadow-2xl transition-all hover:scale-105 font-semibold text-lg"
               >
-                {isLogin ? '✨ Entrar' : '🎉 Criar conta'}
+                {isLogin ? 'Entrar' : 'Criar conta'}
               </button>
             </form>
           </div>

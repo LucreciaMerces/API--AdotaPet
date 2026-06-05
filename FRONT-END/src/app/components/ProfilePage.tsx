@@ -42,6 +42,7 @@ const MOCK_ANIMALS = [
 
 export function ProfilePage({ currentUser, interests }: ProfilePageProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editingAnimal, setEditingAnimal] = useState<any>(null);
   const [customAnimals, setCustomAnimals] = useState<any[]>(() => {
     const stored = localStorage.getItem('customAnimals');
     return stored ? JSON.parse(stored) : [];
@@ -59,9 +60,9 @@ export function ProfilePage({ currentUser, interests }: ProfilePageProps) {
   const hasApprovedAdoption = approvedAdoptions.length > 0;
 
   const allAnimals = [...MOCK_ANIMALS, ...customAnimals];
-  const ngoAnimals = currentUser.type === 'ngo'
-    ? allAnimals.filter(animal => animal.ngoId === currentUser.id || animal.ngoName === currentUser.name)
-    : [];
+  const ngoAnimals = customAnimals.filter(
+  animal => animal.ngoId === currentUser.id
+);
 
   const adoptedAnimalsIds = JSON.parse(localStorage.getItem('adoptedAnimals') || '[]');
   const availableNgoAnimals = ngoAnimals.filter(a => !adoptedAnimalsIds.includes(a.id));
@@ -73,6 +74,27 @@ export function ProfilePage({ currentUser, interests }: ProfilePageProps) {
     localStorage.setItem('customAnimals', JSON.stringify(updated));
   };
 
+  const handleDeleteAnimal = (animalId: string) => {
+  const updated = customAnimals.filter(
+    animal => animal.id !== animalId
+  );
+
+  setCustomAnimals(updated);
+  localStorage.setItem('customAnimals', JSON.stringify(updated));
+};
+
+const handleEditAnimal = (updatedAnimal: any) => {
+  const updated = customAnimals.map(animal =>
+    animal.id === updatedAnimal.id
+      ? updatedAnimal
+      : animal
+  );
+
+  setCustomAnimals(updated);
+  localStorage.setItem('customAnimals', JSON.stringify(updated));
+
+  setEditingAnimal(null);
+};
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50/50 via-white to-pink-50/50">
       <div className="max-w-4xl mx-auto px-4 py-6 md:py-8">
@@ -181,12 +203,31 @@ export function ProfilePage({ currentUser, interests }: ProfilePageProps) {
                     alt={animal.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-3">
-                    <div className="text-white">
-                      <p className="font-medium">{animal.name}</p>
-                      <p className="text-sm text-white/80">{animal.breed}</p>
-                    </div>
-                  </div>
+                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-3">
+  <div className="text-white">
+    <p className="font-medium">{animal.name}</p>
+    <p className="text-sm text-white/80">{animal.breed}</p>
+  </div>
+
+  <div className="flex gap-2 mt-3">
+    <button
+      onClick={() => {
+        setEditingAnimal(animal);
+        setIsAddModalOpen(true);
+      }}
+      className="flex-1 bg-blue-500 text-white py-1 rounded-lg text-sm"
+    >
+      Editar
+    </button>
+
+    <button
+      onClick={() => handleDeleteAnimal(animal.id)}
+      className="flex-1 bg-red-500 text-white py-1 rounded-lg text-sm"
+    >
+      Excluir
+    </button>
+  </div>
+</div>
                 </div>
               ))}
             </div>
@@ -241,21 +282,44 @@ export function ProfilePage({ currentUser, interests }: ProfilePageProps) {
               Animais disponíveis
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {availableNgoAnimals.map(animal => (
-                <div key={animal.id} className="group relative aspect-square rounded-xl overflow-hidden border border-border">
-                  <img
-                    src={animal.image}
-                    alt={animal.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end p-3">
-                    <div className="text-white">
-                      <p className="font-medium">{animal.name}</p>
-                      <p className="text-sm text-white/80">{animal.breed}</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
+            {availableNgoAnimals.map(animal => (
+  <div
+    key={animal.id}
+    className="rounded-xl overflow-hidden border border-border bg-white"
+  >
+    <img
+      src={animal.image}
+      alt={animal.name}
+      className="w-full h-48 object-cover"
+    />
+
+    <div className="p-3">
+      <p className="font-medium">{animal.name}</p>
+      <p className="text-sm text-muted-foreground">
+        {animal.breed}
+      </p>
+
+      <div className="flex gap-2 mt-3">
+        <button
+          onClick={() => {
+            setEditingAnimal(animal);
+            setIsAddModalOpen(true);
+          }}
+          className="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600"
+        >
+          Editar
+        </button>
+
+        <button
+          onClick={() => handleDeleteAnimal(animal.id)}
+          className="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600"
+        >
+          Excluir
+        </button>
+      </div>
+    </div>
+  </div>
+))}
             </div>
           </div>
         )}
@@ -292,12 +356,18 @@ export function ProfilePage({ currentUser, interests }: ProfilePageProps) {
         )}
       </div>
 
+
       <AddAnimalModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onAdd={handleAddAnimal}
-        currentUser={currentUser}
-      />
+  isOpen={isAddModalOpen}
+  onClose={() => {
+    setIsAddModalOpen(false);
+    setEditingAnimal(null);
+  }}
+  onAdd={handleAddAnimal}
+  onEdit={handleEditAnimal}
+  editingAnimal={editingAnimal}
+  currentUser={currentUser}
+/>
     </div>
   );
 }

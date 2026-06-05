@@ -95,7 +95,7 @@ const MOCK_ANIMALS = [
     age: '2 anos',
     gender: 'Fêmea',
     description: 'Nina é uma gatinha muito carinhosa e tranquila. Gosta de ficar pertinho do tutor e é ótima companhia.',
-    image: 'https://images.unsplash.com/photo-1573865526739-10c1dd3aa0f4?w=800',
+    image: 'https://cdn.shopify.com/s/files/1/0500/8965/6473/files/gray-g16b72164c_1920_480x480.jpg?v=1663247513',
     ngoName: 'Felinos Felizes',
     location: 'Belo Horizonte, MG',
     ngoId: 'ngo1'
@@ -116,20 +116,21 @@ const MOCK_ANIMALS = [
 ];
 
 export function FeedPage({ currentUser, onInterest, interests }: FeedPageProps) {
-  const [animals, setAnimals] = useState(MOCK_ANIMALS);
+  const adoptedAnimals = JSON.parse(
+  localStorage.getItem('adoptedAnimals') || '[]'
+);
+
+const customAnimals = JSON.parse(
+  localStorage.getItem('customAnimals') || '[]'
+);
+
+const animals = [...MOCK_ANIMALS, ...customAnimals].filter(
+  animal => !adoptedAnimals.includes(animal.id)
+);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSpecies, setFilterSpecies] = useState<'all' | 'Cachorro' | 'Gato'>('all');
   const [showFilters, setShowFilters] = useState(false);
 
-  useEffect(() => {
-    const adoptedAnimals = JSON.parse(localStorage.getItem('adoptedAnimals') || '[]');
-    const customAnimals = JSON.parse(localStorage.getItem('customAnimals') || '[]');
-    const allAnimals = [...MOCK_ANIMALS, ...customAnimals];
-    const filteredAnimals = allAnimals.filter(
-      animal => !adoptedAnimals.includes(animal.id)
-    );
-    setAnimals(filteredAnimals);
-  }, []);
 
   const filteredAnimals = animals.filter(animal => {
     const matchesSearch = animal.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

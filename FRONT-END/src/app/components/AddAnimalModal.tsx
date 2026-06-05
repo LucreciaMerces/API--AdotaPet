@@ -1,27 +1,57 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Upload, Plus } from 'lucide-react';
 
 interface AddAnimalModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAdd: (animal: any) => void;
+  onEdit?: (animal: any) => void;
+  editingAnimal?: any;
   currentUser: any;
 }
 
-export function AddAnimalModal({ isOpen, onClose, onAdd, currentUser }: AddAnimalModalProps) {
-  const [formData, setFormData] = useState({
-    name: '',
-    species: 'Cachorro',
-    breed: '',
-    age: '',
-    gender: 'Macho',
-    description: '',
-    image: '',
-  });
+export function AddAnimalModal({
+  isOpen,
+  onClose,
+  onAdd,
+  onEdit,
+  editingAnimal,
+  currentUser,
+}: AddAnimalModalProps) {
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+const [formData, setFormData] = useState({
+  name: '',
+  species: 'Cachorro',
+  breed: '',
+  age: '',
+  gender: 'Macho',
+  description: '',
+  image: '',
+});
 
+useEffect(() => {
+  if (editingAnimal) {
+    setFormData({
+      name: editingAnimal.name || '',
+      species: editingAnimal.species || 'Cachorro',
+      breed: editingAnimal.breed || '',
+      age: editingAnimal.age || '',
+      gender: editingAnimal.gender || 'Macho',
+      description: editingAnimal.description || '',
+      image: editingAnimal.image || '',
+    });
+  }
+}, [editingAnimal]);
+
+const handleSubmit = (e: React.FormEvent) => {
+  e.preventDefault();
+
+  if (editingAnimal) {
+    onEdit?.({
+      ...editingAnimal,
+      ...formData,
+    });
+  } else {
     const newAnimal = {
       id: Date.now().toString(),
       ...formData,
@@ -31,17 +61,20 @@ export function AddAnimalModal({ isOpen, onClose, onAdd, currentUser }: AddAnima
     };
 
     onAdd(newAnimal);
-    setFormData({
-      name: '',
-      species: 'Cachorro',
-      breed: '',
-      age: '',
-      gender: 'Macho',
-      description: '',
-      image: '',
-    });
-    onClose();
-  };
+  }
+
+  setFormData({
+    name: '',
+    species: 'Cachorro',
+    breed: '',
+    age: '',
+    gender: 'Macho',
+    description: '',
+    image: '',
+  });
+
+  onClose();
+};
 
   if (!isOpen) return null;
 
@@ -186,6 +219,7 @@ export function AddAnimalModal({ isOpen, onClose, onAdd, currentUser }: AddAnima
             >
               <Plus className="w-5 h-5" />
               Adicionar Animal
+              {editingAnimal ? 'Salvar Alterações' : 'Adicionar Animal'}
             </button>
           </div>
         </form>
