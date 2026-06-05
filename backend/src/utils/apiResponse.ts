@@ -1,8 +1,6 @@
 import { Response } from "express";
 
-// Tipagem da estrutura padrão de todas as respostas da API.
-// Todos os endpoints devem usar essas funções — nunca res.json() direto —
-// para garantir consistência total na API consumida pelo React.
+
 interface ApiResponse<T> {
   success: boolean;
   message: string;
