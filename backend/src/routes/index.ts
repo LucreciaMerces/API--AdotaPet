@@ -1,10 +1,12 @@
 import { Router } from "express";
 import { prisma } from "@config/prisma";
 import { sendSuccess } from "@utils/apiResponse";
-import { authRoutes } from "./authRoutes";
-import { userRoutes } from "./userRoutes";
+import { authRoutes }   from "./authRoutes";
+import { userRoutes }   from "./userRoutes";
+import { animalRoutes } from "./animalRoutes";
 
 const router = Router();
+
 
 router.get("/health", async (_req, res, next) => {
   try {
@@ -20,8 +22,10 @@ router.get("/health", async (_req, res, next) => {
 });
 
 
-router.use("/auth",  authRoutes);   
-router.use("/users", userRoutes);   
+router.use("/auth",    authRoutes);    
+router.use("/users",   userRoutes);    
+router.use("/animals", animalRoutes);  
+
 
 
 export { router as apiRoutes };

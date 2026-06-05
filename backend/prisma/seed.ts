@@ -1,11 +1,10 @@
 import { PrismaClient, UserRole, AnimalSpecies, AnimalGender, AnimalSize, AnimalStatus } from "@prisma/client";
-import { createHash } from "crypto";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
-
-function fakeHash(password: string): string {
-  return "$seed$" + createHash("sha256").update(password).digest("hex");
+async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, 12);
 }
 
 async function main(): Promise<void> {
@@ -24,7 +23,7 @@ async function main(): Promise<void> {
     data: {
       email: "admin@adotapet.com",
       name: "Administrador",
-      password: fakeHash("Admin@123"),
+      password: await hashPassword("Admin@123"),
       role: UserRole.ADMIN,
       city: "São Paulo",
       state: "SP",
@@ -35,7 +34,7 @@ async function main(): Promise<void> {
     data: {
       email: "amigos@adotapet.com",
       name: "ONG Amigos dos Animais",
-      password: fakeHash("Ong@123"),
+      password: await hashPassword("Ong@123"),
       role: UserRole.NGO,
       phone: "(11) 91234-5678",
       bio: "Resgatamos e reabilitamos animais abandonados desde 2010.",
@@ -48,7 +47,7 @@ async function main(): Promise<void> {
     data: {
       email: "patinhas@adotapet.com",
       name: "ONG Patinhas Felizes",
-      password: fakeHash("Ong@123"),
+      password: await hashPassword("Ong@123"),
       role: UserRole.NGO,
       phone: "(21) 98765-4321",
       bio: "Trabalhamos para encontrar lares amorosos para cães e gatos.",
@@ -61,7 +60,7 @@ async function main(): Promise<void> {
     data: {
       email: "joao@email.com",
       name: "João Silva",
-      password: fakeHash("Joao@123"),
+      password: await hashPassword("Joao@123"),
       role: UserRole.ADOPTER,
       phone: "(11) 99999-1111",
       city: "São Paulo",
@@ -73,7 +72,7 @@ async function main(): Promise<void> {
     data: {
       email: "maria@email.com",
       name: "Maria Oliveira",
-      password: fakeHash("Maria@123"),
+      password: await hashPassword("Maria@123"),
       role: UserRole.ADOPTER,
       phone: "(21) 99999-2222",
       city: "Rio de Janeiro",
@@ -257,8 +256,6 @@ async function main(): Promise<void> {
   console.log(`   Adotante : joao@email.com       / Joao@123`);
   console.log(`   Adotante : maria@email.com      / Maria@123`);
 
-  console.log("\n ATENÇÃO: as senhas usam hash simplificado para seed.");
-  console.log("No Sprint 3 o authService usará bcryptjs:reset após.");
 
   void admin;
 }
