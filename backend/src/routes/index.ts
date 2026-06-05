@@ -1,12 +1,10 @@
-
-
 import { Router } from "express";
 import { prisma } from "@config/prisma";
 import { sendSuccess } from "@utils/apiResponse";
 import { authRoutes } from "./authRoutes";
+import { userRoutes } from "./userRoutes";
 
 const router = Router();
-
 
 router.get("/health", async (_req, res, next) => {
   try {
@@ -22,7 +20,8 @@ router.get("/health", async (_req, res, next) => {
 });
 
 
-router.use("/auth", authRoutes);       
+router.use("/auth",  authRoutes);   
+router.use("/users", userRoutes);   
 
 
 export { router as apiRoutes };
