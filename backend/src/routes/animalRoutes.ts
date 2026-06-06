@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { animalController } from "@controllers/animalController";
+import { uploadController }  from "@controllers/uploadController";
 import { authMiddleware, ngoMiddleware } from "@middlewares/authMiddleware";
 
 
@@ -10,5 +11,7 @@ router.get(  "/:id", authMiddleware,                    animalController.getById
 router.post( "/",    authMiddleware, ngoMiddleware,     animalController.create);
 router.put(  "/:id", authMiddleware, ngoMiddleware,     animalController.update);
 router.delete("/:id", authMiddleware, ngoMiddleware,    animalController.remove);
+router.post(  "/:id/images", authMiddleware, ngoMiddleware,  uploadController.uploadAnimalImage);
+
 
 export { router as animalRoutes };
