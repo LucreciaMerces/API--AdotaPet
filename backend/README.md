@@ -48,7 +48,7 @@ npm run test         # Roda todos os testes
 npm run test:watch   # Testes em modo watch
 npm run test:coverage # Testes com relatório de cobertura
 npm run db:studio    # Painel visual do banco (Prisma Studio)
-npm run db:reset     # Reseta o banco (CUIDADO: apaga todos os dados)
+npm run db:reset     # Reseta o banco (apaga todos os dados)
 ```
 
 ## Estrutura
@@ -56,8 +56,8 @@ npm run db:reset     # Reseta o banco (CUIDADO: apaga todos os dados)
 ```
 backend/
 ├── prisma/
-│   ├── schema.prisma     # Modelos do banco (Sprint 2)
-│   └── seed.ts           # Dados iniciais (Sprint 2)
+│   ├── schema.prisma     # Modelos do banco 
+│   └── seed.ts           # Dados iniciais
 ├── src/
 │   ├── config/
 │   │   ├── env.ts        # Validação das variáveis de ambiente (Zod)
@@ -90,7 +90,7 @@ backend/
 
 ## Sprints
 
-- [x] **Sprint 1** — Estrutura base *(atual)*
+- [x] **Sprint 1** — Estrutura base 
 - [ ] **Sprint 2** — Modelagem do banco + Prisma
 - [ ] **Sprint 3** — Autenticação JWT
 - [ ] **Sprint 4** — Usuários
