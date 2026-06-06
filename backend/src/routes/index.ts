@@ -4,6 +4,8 @@ import { sendSuccess } from "@utils/apiResponse";
 import { authRoutes }   from "./authRoutes";
 import { userRoutes }   from "./userRoutes";
 import { animalRoutes } from "./animalRoutes";
+import { favoriteRoutes } from "./favoriteRoutes";
+
 
 const router = Router();
 
@@ -24,7 +26,8 @@ router.get("/health", async (_req, res, next) => {
 
 router.use("/auth",    authRoutes);    
 router.use("/users",   userRoutes);    
-router.use("/animals", animalRoutes);  
+router.use("/animals", animalRoutes); 
+router.use("/favorites", favoriteRoutes); 
 
 
 
