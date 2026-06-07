@@ -26,7 +26,7 @@ const [formData, setFormData] = useState({
   age: '',
   gender: 'Macho',
   description: '',
-  image: '',
+  image: null as File | null,
 });
 
 useEffect(() => {
@@ -64,14 +64,14 @@ const handleSubmit = (e: React.FormEvent) => {
   }
 
   setFormData({
-    name: '',
-    species: 'Cachorro',
-    breed: '',
-    age: '',
-    gender: 'Macho',
-    description: '',
-    image: '',
-  });
+  name: '',
+  species: 'Cachorro',
+  breed: '',
+  age: '',
+  gender: 'Macho',
+  description: '',
+  image: null,
+});
 
   onClose();
 };
@@ -163,36 +163,35 @@ const handleSubmit = (e: React.FormEvent) => {
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium mb-2">URL da Foto *</label>
-            <div className="relative">
-              <Upload className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <input
-                type="url"
-                value={formData.image}
-                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
-                className="w-full pl-12 pr-4 py-3 rounded-xl bg-input-background border-2 border-border focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-                placeholder="https://exemplo.com/foto-do-animal.jpg"
-                required
-              />
-            </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              Cole o link de uma imagem do animal (Unsplash, Imgur, etc.)
-            </p>
-          </div>
+          <label className="block text-sm font-medium mb-2">
+  Foto do Animal *
+</label>
+
+<input
+  type="file"
+  accept="image/*"
+  onChange={(e) => {
+    const file = e.target.files?.[0];
+
+    if (!file) return;
+
+    setFormData({
+      ...formData,
+      image: file
+    });
+  }}
+  className="w-full px-4 py-3 rounded-xl bg-input-background border-2 border-border"
+/>
 
           {formData.image && (
-            <div className="rounded-xl overflow-hidden border-2 border-border">
-              <img
-                src={formData.image}
-                alt="Preview"
-                className="w-full h-48 object-cover"
-                onError={(e) => {
-                  e.currentTarget.src = 'https://via.placeholder.com/400x300?text=Imagem+Inválida';
-                }}
-              />
-            </div>
-          )}
+  <div className="rounded-xl overflow-hidden border-2 border-border">
+    <img
+      src={URL.createObjectURL(formData.image)}
+      alt="Preview"
+      className="w-full h-48 object-cover"
+    />
+  </div>
+)}
 
           <div>
             <label className="block text-sm font-medium mb-2">Descrição *</label>
