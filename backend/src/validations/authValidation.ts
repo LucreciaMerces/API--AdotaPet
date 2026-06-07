@@ -28,6 +28,7 @@ export const registerSchema = z.object({
     phone: z.string().optional(),
     city: z.string().optional(),
     state: z.string().optional(),
+    bio: z.string().max(500).optional(),
   }),
 });
 

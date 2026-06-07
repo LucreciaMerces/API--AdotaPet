@@ -41,6 +41,7 @@ export const authService = {
       password: hashedPassword,
       role: (input.role ?? "ADOPTER") as UserRole,
       phone: input.phone,
+      bio: input.bio,
       city: input.city,
       state: input.state,
     });

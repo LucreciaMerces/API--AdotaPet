@@ -8,6 +8,7 @@ export interface CreateUserData {
   password: string; 
   role: UserRole;
   phone?: string;
+  bio?: string;
   city?: string;
   state?: string;
 }
