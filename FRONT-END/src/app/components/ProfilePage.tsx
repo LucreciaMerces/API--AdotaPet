@@ -121,12 +121,40 @@ const handleEditAnimal = (updatedAnimal: any) => {
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-2 text-muted-foreground mb-4">
-                <Mail className="w-4 h-4" />
-                <span className="text-sm break-all">{currentUser.email}</span>
-              </div>
+             <div className="flex items-center gap-2 text-muted-foreground mb-4">
+  <Mail className="w-4 h-4" />
+  <span className="text-sm break-all">{currentUser.email}</span>
+</div>
 
-              {hasApprovedAdoption && currentUser.type === 'adopter' && (
+<div className="space-y-2 mb-4">
+
+  {currentUser.phone && (
+    <p className="text-sm">
+      <strong>Telefone:</strong> {currentUser.phone}
+    </p>
+  )}
+
+  {currentUser.city && currentUser.state && (
+    <p className="text-sm">
+      <strong>Localização:</strong> {currentUser.city} - {currentUser.state}
+    </p>
+  )}
+
+  {currentUser.type === 'ngo' && currentUser.bio && (
+    <div>
+      <p className="font-medium mb-1">
+        Sobre a ONG
+      </p>
+
+      <p className="text-sm text-muted-foreground">
+        {currentUser.bio}
+      </p>
+    </div>
+  )}
+
+</div>
+
+{hasApprovedAdoption && currentUser.type === 'adopter' && (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
                   <div className="flex items-center gap-2 text-green-700">
                     <CheckCircle className="w-5 h-5" />
