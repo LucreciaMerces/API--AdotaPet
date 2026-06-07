@@ -7,11 +7,13 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
 enum UserRole {
   ADOPTER
   NGO
   ADMIN
 }
+
 
 enum AdoptionStatus {
   PENDING
@@ -19,6 +21,7 @@ enum AdoptionStatus {
   REJECTED
   CANCELLED
 }
+
 
 enum AnimalStatus {
   AVAILABLE
@@ -35,9 +38,9 @@ enum AnimalSpecies {
 }
 
 enum AnimalSize {
-  SMALL
-  MEDIUM
-  LARGE
+  SMALL   
+  MEDIUM  
+  LARGE   
 }
 
 enum AnimalGender {
@@ -45,11 +48,12 @@ enum AnimalGender {
   FEMALE
 }
 
+
 model User {
   id        String   @id @default(cuid())
   email     String   @unique
   name      String
-  password  String
+  password  String   
   role      UserRole @default(ADOPTER)
 
   phone     String?
@@ -61,34 +65,44 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  
   animals   Animal[]
+
+  
   adoptions Adoption[]
+
+ 
   favorites Favorite[]
+
+  
+  sentMessages Message[]
 
   @@index([email])
   @@index([role])
   @@map("users")
 }
 
-model Animal {
-  id           String        @id @default(cuid())
-  name         String
-  species      AnimalSpecies
-  breed        String?
-  age          Int?
-  gender       AnimalGender
-  size         AnimalSize
-  description  String?
-  status       AnimalStatus  @default(AVAILABLE)
-  isVaccinated Boolean       @default(false)
-  isNeutered   Boolean       @default(false)
 
-  ngoId String
-  ngo   User @relation(fields: [ngoId], references: [id], onDelete: Cascade)
+model Animal {
+  id          String        @id @default(cuid())
+  name        String
+  species     AnimalSpecies
+  breed       String?       
+  age         Int?          
+  gender      AnimalGender
+  size        AnimalSize
+  description String?       
+  status      AnimalStatus  @default(AVAILABLE)
+  isVaccinated Boolean      @default(false)
+  isNeutered   Boolean      @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  
+  ngoId String
+  ngo   User   @relation(fields: [ngoId], references: [id], onDelete: Cascade)
+  
   images    Image[]
   adoptions Adoption[]
   favorites Favorite[]
@@ -99,20 +113,26 @@ model Animal {
   @@map("animals")
 }
 
+
 model Adoption {
-  id          String         @id @default(cuid())
-  status      AdoptionStatus @default(PENDING)
-  message     String?
+  id      String         @id @default(cuid())
+  status  AdoptionStatus @default(PENDING)
+  message String?        
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  resolvedAt  DateTime?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+  resolvedAt DateTime? 
 
+  
   adopterId String
-  adopter   User @relation(fields: [adopterId], references: [id], onDelete: Cascade)
+  adopter   User   @relation(fields: [adopterId], references: [id], onDelete: Cascade)
 
+  
   animalId String
   animal   Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
+
+ 
+  messages  Message[]
 
   @@index([adopterId])
   @@index([animalId])
@@ -120,12 +140,13 @@ model Adoption {
   @@map("adoptions")
 }
 
+
 model Favorite {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
 
   userId String
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   animalId String
   animal   Animal @relation(fields: [animalId], references: [id], onDelete: Cascade)
@@ -135,10 +156,11 @@ model Favorite {
   @@map("favorites")
 }
 
+
 model Image {
   id        String   @id @default(cuid())
-  url       String
-  key       String   @unique
+  url       String   
+  key       String   @unique 
   isPrimary Boolean  @default(false)
 
   createdAt DateTime @default(now())
@@ -148,4 +170,22 @@ model Image {
 
   @@index([animalId])
   @@map("images")
+}
+
+
+model Message {
+  id        String   @id @default(cuid())
+  content   String
+
+  createdAt DateTime @default(now())
+
+  senderId String
+  sender   User   @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  adoptionId String
+  adoption   Adoption @relation(fields: [adoptionId], references: [id], onDelete: Cascade)
+
+  @@index([adoptionId])
+  @@index([senderId])
+  @@map("messages")
 }

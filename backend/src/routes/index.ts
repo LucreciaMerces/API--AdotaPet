@@ -6,6 +6,8 @@ import { userRoutes }   from "./userRoutes";
 import { animalRoutes } from "./animalRoutes";
 import { favoriteRoutes } from "./favoriteRoutes";
 import { adoptionRoutes } from "./adoptionRoutes";
+import { messageRoutes }  from "./messageRoutes";
+
 
 const router = Router();
 
@@ -29,6 +31,6 @@ router.use("/users",   userRoutes);
 router.use("/animals", animalRoutes); 
 router.use("/favorites", favoriteRoutes); 
 router.use("/adoptions", adoptionRoutes);
-
+router.use("/messages",  messageRoutes);
 
 export { router as apiRoutes };

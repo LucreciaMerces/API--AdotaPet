@@ -7,8 +7,8 @@ import { env } from "@config/env";
 
 
 export function errorHandler(
-  _req: Request,
   err: unknown,
+  _req: Request,
   res: Response,
   _next: NextFunction
 ): void {
