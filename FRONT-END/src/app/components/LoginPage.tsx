@@ -9,22 +9,35 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   const [isLogin, setIsLogin] = useState(true);
   const [userType, setUserType] = useState<'adopter' | 'ngo'>('adopter');
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    name: '',
-  });
+  name: '',
+  email: '',
+  password: '',
+  phone: '',
+  city: '',
+  state: '',
+  bio: '',
+});
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const user = {
-      id: Date.now().toString(),
-      email: formData.email,
-      name: formData.name || formData.email.split('@')[0],
-      type: userType,
-      adoptionsCount: 0,
-      approvedAdoptions: []
-    };
+   const user = {
+  id: Date.now().toString(),
+  email: formData.email,
+  name: formData.name,
+  type: userType,
+
+  phone: formData.phone,
+  city: formData.city,
+  state: formData.state,
+
+  bio: userType === 'ngo'
+    ? formData.bio
+    : null,
+
+  adoptionsCount: 0,
+  approvedAdoptions: []
+};
 
     const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
     const foundUser = existingUsers.find((u: any) => u.email === formData.email);
@@ -155,22 +168,73 @@ export function LoginPage({ onLogin }: LoginPageProps) {
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {!isLogin && (
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    {userType === 'adopter' ? 'Seu nome' : 'Nome da ONG'}
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl bg-input-background border-2 border-border focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
-                    placeholder={userType === 'adopter' ? 'João Silva' : 'ONG Patinhas Felizes'}
-                    required={!isLogin}
-                  />
-                </div>
-              )}
+           <form onSubmit={handleSubmit} className="space-y-4">
+  {!isLogin && (
+    <>
+      <div>
+        <label className="block text-sm font-medium mb-2">
+          {userType === 'adopter' ? 'Seu nome' : 'Nome da ONG'}
+        </label>
+        <input
+          type="text"
+          value={formData.name}
+          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          className="w-full px-4 py-3 rounded-xl bg-input-background border-2 border-border focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+          placeholder={userType === 'adopter' ? 'João Silva' : 'ONG Patinhas Felizes'}
+          required={!isLogin}
+        />
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-2">
+          Telefone
+        </label>
+
+        <input
+          type="text"
+          value={formData.phone}
+          onChange={(e) =>
+            setFormData({ ...formData, phone: e.target.value })
+          }
+          className="w-full px-4 py-3 rounded-xl bg-input-background border-2 border-border focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all"
+          placeholder="(11) 99999-9999"
+        />
+      </div>
+      <div>
+  <label className="block text-sm font-medium mb-2">
+    Estado
+  </label>
+
+  <input
+    type="text"
+    value={formData.state}
+    onChange={(e) =>
+      setFormData({ ...formData, state: e.target.value })
+    }
+    className="w-full px-4 py-3 rounded-xl bg-input-background border-2 border-border"
+    placeholder="PI"
+    maxLength={2}
+  />
+</div>
+{!isLogin && userType === 'ngo' && (
+  <div>
+    <label className="block text-sm font-medium mb-2">
+      Sobre a ONG
+    </label>
+
+    <textarea
+      value={formData.bio}
+      onChange={(e) =>
+        setFormData({ ...formData, bio: e.target.value })
+      }
+      rows={4}
+      className="w-full px-4 py-3 rounded-xl bg-input-background border-2 border-border"
+      placeholder="Conte um pouco sobre a ONG..."
+    />
+  </div>
+)}
+    </>
+  )}
 
               <div>
                 <label className="block text-sm font-medium mb-2">Email</label>
