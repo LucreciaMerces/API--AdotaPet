@@ -5,7 +5,7 @@ import { authRoutes }   from "./authRoutes";
 import { userRoutes }   from "./userRoutes";
 import { animalRoutes } from "./animalRoutes";
 import { favoriteRoutes } from "./favoriteRoutes";
-
+import { adoptionRoutes } from "./adoptionRoutes";
 
 const router = Router();
 
@@ -28,7 +28,7 @@ router.use("/auth",    authRoutes);
 router.use("/users",   userRoutes);    
 router.use("/animals", animalRoutes); 
 router.use("/favorites", favoriteRoutes); 
-
+router.use("/adoptions", adoptionRoutes);
 
 
 export { router as apiRoutes };
