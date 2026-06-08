@@ -42,3 +42,24 @@ export async function login(data: any) {
 
   return result.data;
 }
+
+export async function getMe() {
+  const token = localStorage.getItem("token");
+
+  const response = await fetch(
+    `${API_URL}/auth/me`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message);
+  }
+
+  return result.data;
+}

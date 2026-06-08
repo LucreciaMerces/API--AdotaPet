@@ -1,3 +1,4 @@
+import { getMe } from '../services/auth';
 import { useState, useEffect } from 'react';
 import { Heart, User, MessageCircle, LogOut, Home, FileCheck } from 'lucide-react';
 import { LoginPage } from './components/LoginPage';
@@ -5,7 +6,6 @@ import { FeedPage } from './components/FeedPage';
 import { ProfilePage } from './components/ProfilePage';
 import { ChatPage } from './components/ChatPage';
 import { AdoptionRequests } from './components/AdoptionRequests';
-
 type Page = 'feed' | 'profile' | 'chat' | 'requests';
 
 export default function App() {
@@ -15,11 +15,31 @@ export default function App() {
   const [chatWith, setChatWith] = useState<string | null>(null);
 
   useEffect(() => {
-    const stored = localStorage.getItem('currentUser');
-    if (stored) {
-      setCurrentUser(JSON.parse(stored));
+  async function loadUser() {
+
+    const token =
+      localStorage.getItem('token');
+
+    if (!token) return;
+
+    try {
+
+      const user =
+        await getMe();
+
+      setCurrentUser(user);
+
+    } catch (error) {
+
+      localStorage.removeItem('token');
+      localStorage.removeItem('currentUser');
+
+      console.error(error);
     }
-  }, []);
+  }
+
+  loadUser();
+}, []);
 
   useEffect(() => {
     if (currentUser) {
@@ -42,11 +62,14 @@ export default function App() {
     }
   };
 
-  const handleLogout = () => {
-    setCurrentUser(null);
-    localStorage.removeItem('currentUser');
-    setCurrentPage('feed');
-  };
+ const handleLogout = () => {
+  setCurrentUser(null);
+
+  localStorage.removeItem('token');
+  localStorage.removeItem('currentUser');
+
+  setCurrentPage('feed');
+};
 
   const handleInterest = (animalId: string) => {
     if (interests.includes(animalId)) return;
