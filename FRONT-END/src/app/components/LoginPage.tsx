@@ -1,5 +1,9 @@
 import { useState } from 'react';
 import { User, Building2, Heart, PawPrint, Mail, Lock } from 'lucide-react';
+import {
+  register,
+  login
+} from "../../services/auth";
 
 interface LoginPageProps {
   onLogin: (user: any) => void;
@@ -18,38 +22,57 @@ export function LoginPage({ onLogin }: LoginPageProps) {
   bio: '',
 });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-   const user = {
-  id: Date.now().toString(),
-  email: formData.email,
-  name: formData.name,
-  type: userType,
+  console.log("HANDLE SUBMIT EXECUTOU");
+  console.log("isLogin =", isLogin);
 
-  phone: formData.phone,
-  city: formData.city,
-  state: formData.state,
+  try {
+    console.log("ANTES DO REGISTER/LOGIN");
 
-  bio: userType === 'ngo'
-    ? formData.bio
-    : null,
+    if (!isLogin) {
+      const result = await register({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+        role: userType === "ngo" ? "NGO" : "ADOPTER",
+        phone: formData.phone,
+        city: formData.city,
+        state: formData.state,
+        bio: userType === "ngo" ? formData.bio : undefined,
+      });
 
-  adoptionsCount: 0,
-  approvedAdoptions: []
-};
+      console.log("REGISTER RETORNOU:", result);
 
-    const existingUsers = JSON.parse(localStorage.getItem('users') || '[]');
-    const foundUser = existingUsers.find((u: any) => u.email === formData.email);
+      localStorage.setItem("token", result.token);
+      localStorage.setItem(
+        "currentUser",
+        JSON.stringify(result.user)
+      );
 
-    if (foundUser) {
-      onLogin(foundUser);
+      onLogin(result.user);
     } else {
-      existingUsers.push(user);
-      localStorage.setItem('users', JSON.stringify(existingUsers));
-      onLogin(user);
+      const result = await login({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      console.log("LOGIN RETORNOU:", result);
+
+      localStorage.setItem("token", result.token);
+      localStorage.setItem(
+        "currentUser",
+        JSON.stringify(result.user)
+      );
+
+      onLogin(result.user);
     }
-  };
+  } catch (error) {
+    console.error(error);
+    alert("Erro ao cadastrar/logar");
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-100 via-pink-100 to-purple-100 flex items-center justify-center p-4 relative overflow-hidden">
