@@ -24,23 +24,42 @@ const [formData, setFormData] = useState({
   species: 'Cachorro',
   breed: '',
   age: '',
+
   gender: 'Macho',
+  size: 'Médio',
+
   description: '',
+
+  status: 'Disponível',
+
+  isVaccinated: false,
+  isNeutered: false,
+
   image: null as File | null,
+
 });
 
 useEffect(() => {
-  if (editingAnimal) {
-    setFormData({
-      name: editingAnimal.name || '',
-      species: editingAnimal.species || 'Cachorro',
-      breed: editingAnimal.breed || '',
-      age: editingAnimal.age || '',
-      gender: editingAnimal.gender || 'Macho',
-      description: editingAnimal.description || '',
-      image: editingAnimal.image || '',
-    });
-  }
+  if (!editingAnimal) return;
+
+  setFormData({
+    name: editingAnimal.name || '',
+    species: editingAnimal.species || 'Cachorro',
+    breed: editingAnimal.breed || '',
+    age: editingAnimal.age || '',
+
+    gender: editingAnimal.gender || 'Macho',
+    size: editingAnimal.size || 'Médio',
+
+    description: editingAnimal.description || '',
+
+    status: editingAnimal.status || 'Disponível',
+
+    isVaccinated: editingAnimal.isVaccinated || false,
+    isNeutered: editingAnimal.isNeutered || false,
+
+    image: editingAnimal.image || null,
+  });
 }, [editingAnimal]);
 
 const handleSubmit = (e: React.FormEvent) => {
@@ -69,6 +88,10 @@ const handleSubmit = (e: React.FormEvent) => {
   breed: '',
   age: '',
   gender: 'Macho',
+  size: 'MEDIUM',
+  status: 'AVAILABLE',
+  isVaccinated: false,
+  isNeutered: false,
   description: '',
   image: null,
 });
@@ -162,7 +185,89 @@ const handleSubmit = (e: React.FormEvent) => {
               </select>
             </div>
           </div>
+          <div>
+  <label className="block text-sm font-medium mb-2">
+    Porte *
+  </label>
 
+  <select
+    value={formData.size}
+    onChange={(e) =>
+      setFormData({
+        ...formData,
+        size: e.target.value,
+      })
+    }
+    className="w-full px-4 py-3 rounded-xl bg-input-background border-2 border-border"
+  >
+    <option value="Pequeno">Pequeno</option>
+    <option value="Médio">Médio</option>
+    <option value="Grande">Grande</option>
+  </select>
+</div>
+
+<div>
+  <label className="block text-sm font-medium mb-2">
+    Status
+  </label>
+
+  <select
+    value={formData.status}
+    onChange={(e) =>
+      setFormData({
+        ...formData,
+        status: e.target.value,
+      })
+    }
+    className="w-full px-4 py-3 rounded-xl bg-input-background border-2 border-border"
+  >
+    <option value="Disponível">
+      Disponível
+    </option>
+
+    <option value="Pendente">
+      Pendente
+    </option>
+
+    <option value="Adotado">
+      Adotado
+    </option>
+  </select>
+</div>
+
+<div className="grid md:grid-cols-2 gap-4">
+
+  <label className="flex items-center gap-3">
+    <input
+      type="checkbox"
+      checked={formData.isVaccinated}
+      onChange={(e) =>
+        setFormData({
+          ...formData,
+          isVaccinated: e.target.checked,
+        })
+      }
+    />
+
+    Vacinado
+  </label>
+
+  <label className="flex items-center gap-3">
+    <input
+      type="checkbox"
+      checked={formData.isNeutered}
+      onChange={(e) =>
+        setFormData({
+          ...formData,
+          isNeutered: e.target.checked,
+        })
+      }
+    />
+
+    Castrado
+  </label>
+
+</div>
           <label className="block text-sm font-medium mb-2">
   Foto do Animal *
 </label>
@@ -183,7 +288,8 @@ const handleSubmit = (e: React.FormEvent) => {
   className="w-full px-4 py-3 rounded-xl bg-input-background border-2 border-border"
 />
 
-          {formData.image && (
+
+{formData.image instanceof File && (
   <div className="rounded-xl overflow-hidden border-2 border-border">
     <img
       src={URL.createObjectURL(formData.image)}
