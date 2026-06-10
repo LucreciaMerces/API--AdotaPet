@@ -1,5 +1,5 @@
 import { getProfile } from '../../services/user';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { User, Mail, Heart, CheckCircle, Building2, PawPrint, Plus } from 'lucide-react';
 import { AddAnimalModal } from './AddAnimalModal';
 
@@ -49,7 +49,8 @@ export function ProfilePage({ interests }: ProfilePageProps) {
     return stored ? JSON.parse(stored) : [];
   });
 
-  // Fallback temporário para ngoAnimals não quebrar o código
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   const ngoAnimals: any[] = []; 
 
   const interestedAnimals = MOCK_ANIMALS.filter(animal =>
@@ -59,6 +60,15 @@ export function ProfilePage({ interests }: ProfilePageProps) {
   const adoptedAnimalsIds = JSON.parse(localStorage.getItem('adoptedAnimals') || '[]');
   const availableNgoAnimals = ngoAnimals.filter(a => !adoptedAnimalsIds.includes(a.id));
   const adoptedNgoAnimals = ngoAnimals.filter(a => adoptedAnimalsIds.includes(a.id));
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      console.log("Arquivo selecionado para upload:", file);
+      // Aqui você pode chamar a sua função de serviço do backend passando o arquivo:
+      // ex: await uploadAvatarService(file);
+    }
+  };
 
   const handleAddAnimal = (animal: any) => {
     const updated = [...customAnimals, animal];
@@ -113,13 +123,41 @@ export function ProfilePage({ interests }: ProfilePageProps) {
       <div className="max-w-4xl mx-auto px-4 py-6 md:py-8">
         <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-6 border border-border">
           <div className="flex flex-col md:flex-row items-start gap-6 mb-6">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center text-white flex-shrink-0">
-              {profile.role === 'NGO' ? (
-                <Building2 className="w-12 h-12" />
-              ) : (
-                <User className="w-12 h-12" />
-              )}
+            
+            {/* INPUT DE ARQUIVO OCULTO E AVATAR CLICÁVEL */}
+            <div className="relative group flex-shrink-0">
+              <input 
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/*"
+                className="hidden"
+                id="avatar-upload"
+              />
+              <label 
+                htmlFor="avatar-upload"
+                className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center text-white cursor-pointer shadow-md hover:shadow-lg hover:brightness-110 transition-all relative overflow-hidden block"
+                title="Clique para alterar a foto"
+              >
+                {profile.avatarUrl ? (
+                  <img 
+                    src={profile.avatarUrl} 
+                    alt="Avatar" 
+                    className="w-full h-full object-cover rounded-full"
+                  />
+                ) : profile.role === 'NGO' ? (
+                  <Building2 className="w-12 h-12" />
+                ) : (
+                  <User className="w-12 h-12" />
+                )}
+                
+                {/* Overlay de hover indicando que é editável */}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-full">
+                  <span className="text-[10px] text-white font-semibold uppercase tracking-wider">Alterar</span>
+                </div>
+              </label>
             </div>
+
             <div className="flex-1 w-full">
               <div className="flex flex-wrap items-center gap-3 mb-2">
                 <h1 className="text-2xl md:text-3xl">{profile.name}</h1>
@@ -224,51 +262,6 @@ export function ProfilePage({ interests }: ProfilePageProps) {
             </button>
           )}
         </div>
-
-        {/* COMENTADO TEMPORARIAMENTE POIS adoptedAnimals NÃO EXISTE NO ESCOPO ATUAL
-          {profile.role === 'ADOPTER' && adoptedAnimals.length > 0 && (
-            <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-border">
-              <h2 className="text-2xl mb-4 flex items-center gap-2">
-                <CheckCircle className="w-6 h-6 text-green-500" />
-                Pets adotados
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                {adoptedAnimals.map(animal => (
-                  <div key={animal.id} className="group relative aspect-square rounded-xl overflow-hidden border-2 border-green-200">
-                    <img
-                      src={animal.image}
-                      alt={animal.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-3">
-                      <div className="text-white">
-                        <p className="font-medium">{animal.name}</p>
-                        <p className="text-sm text-white/80">{animal.breed}</p>
-                      </div>
-                      <div className="flex gap-2 mt-3">
-                        <button
-                          onClick={() => {
-                            setEditingAnimal(animal);
-                            setIsAddModalOpen(true);
-                          }}
-                          className="flex-1 bg-blue-500 text-white py-1 rounded-lg text-sm"
-                        >
-                          Editar
-                        </button>
-                        <button
-                          onClick={() => handleDeleteAnimal(animal.id)}
-                          className="flex-1 bg-red-500 text-white py-1 rounded-lg text-sm"
-                        >
-                          Excluir
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )} 
-        */}
 
         {profile.role === 'ADOPTER' && interestedAnimals.length > 0 && (
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-border">
