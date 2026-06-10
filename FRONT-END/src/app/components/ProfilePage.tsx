@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { getProfile } from '../../services/user';
+import { useState, useEffect } from 'react';
 import { User, Mail, Heart, CheckCircle, Building2, PawPrint, Plus } from 'lucide-react';
 import { AddAnimalModal } from './AddAnimalModal';
 
 interface ProfilePageProps {
-  currentUser: any;
   interests: string[];
 }
 
@@ -40,29 +40,21 @@ const MOCK_ANIMALS = [
   },
 ];
 
-export function ProfilePage({ currentUser, interests }: ProfilePageProps) {
+export function ProfilePage({ interests }: ProfilePageProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [profile, setProfile] = useState<any>(null);
   const [editingAnimal, setEditingAnimal] = useState<any>(null);
   const [customAnimals, setCustomAnimals] = useState<any[]>(() => {
     const stored = localStorage.getItem('customAnimals');
     return stored ? JSON.parse(stored) : [];
   });
 
+  // Fallback temporário para ngoAnimals não quebrar o código
+  const ngoAnimals: any[] = []; 
+
   const interestedAnimals = MOCK_ANIMALS.filter(animal =>
     interests.includes(animal.id)
   );
-
-  const approvedAdoptions = currentUser.approvedAdoptions || [];
-  const adoptedAnimals = MOCK_ANIMALS.filter(animal =>
-    approvedAdoptions.includes(animal.id)
-  );
-
-  const hasApprovedAdoption = approvedAdoptions.length > 0;
-
-  const allAnimals = [...MOCK_ANIMALS, ...customAnimals];
-  const ngoAnimals = customAnimals.filter(
-  animal => animal.ngoId === currentUser.id
-);
 
   const adoptedAnimalsIds = JSON.parse(localStorage.getItem('adoptedAnimals') || '[]');
   const availableNgoAnimals = ngoAnimals.filter(a => !adoptedAnimalsIds.includes(a.id));
@@ -75,33 +67,54 @@ export function ProfilePage({ currentUser, interests }: ProfilePageProps) {
   };
 
   const handleDeleteAnimal = (animalId: string) => {
-  const updated = customAnimals.filter(
-    animal => animal.id !== animalId
-  );
+    const updated = customAnimals.filter(
+      animal => animal.id !== animalId
+    );
+    setCustomAnimals(updated);
+    localStorage.setItem('customAnimals', JSON.stringify(updated));
+  };
 
-  setCustomAnimals(updated);
-  localStorage.setItem('customAnimals', JSON.stringify(updated));
-};
+  const handleEditAnimal = (updatedAnimal: any) => {
+    const updated = customAnimals.map(animal =>
+      animal.id === updatedAnimal.id ? updatedAnimal : animal
+    );
+    setCustomAnimals(updated);
+    localStorage.setItem('customAnimals', JSON.stringify(updated));
+    setEditingAnimal(null);
+  };
 
-const handleEditAnimal = (updatedAnimal: any) => {
-  const updated = customAnimals.map(animal =>
-    animal.id === updatedAnimal.id
-      ? updatedAnimal
-      : animal
-  );
+  useEffect(() => {
+    async function loadProfile() {
+      try {
+        const data = await getProfile();
+        setProfile(data);
+      } catch (error) {
+        console.error(error);
+      }
+    }
+    loadProfile();
+  }, []);
 
-  setCustomAnimals(updated);
-  localStorage.setItem('customAnimals', JSON.stringify(updated));
+  if (!profile) {
+    return (
+      <div className="p-10">
+        Carregando perfil...
+      </div>
+    );
+  }
 
-  setEditingAnimal(null);
-};
+  const hasApprovedAdoption =
+    profile.role === "ADOPTER"
+      ? profile.stats.adoptions > 0
+      : false;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50/50 via-white to-pink-50/50">
       <div className="max-w-4xl mx-auto px-4 py-6 md:py-8">
         <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-6 border border-border">
           <div className="flex flex-col md:flex-row items-start gap-6 mb-6">
             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center text-white flex-shrink-0">
-              {currentUser.type === 'ngo' ? (
+              {profile.role === 'NGO' ? (
                 <Building2 className="w-12 h-12" />
               ) : (
                 <User className="w-12 h-12" />
@@ -109,52 +122,45 @@ const handleEditAnimal = (updatedAnimal: any) => {
             </div>
             <div className="flex-1 w-full">
               <div className="flex flex-wrap items-center gap-3 mb-2">
-                <h1 className="text-2xl md:text-3xl">{currentUser.name}</h1>
-                {currentUser.type === 'ngo' && (
+                <h1 className="text-2xl md:text-3xl">{profile.name}</h1>
+                {profile.role === 'NGO' && (
                   <span className="px-3 py-1 rounded-full bg-pink-100 text-pink-700 text-sm">
                     ONG
                   </span>
                 )}
-                {currentUser.type === 'adopter' && (
+                {profile.role === 'ADOPTER' && (
                   <span className="px-3 py-1 rounded-full bg-orange-100 text-orange-700 text-sm">
                     Adotante
                   </span>
                 )}
               </div>
-             <div className="flex items-center gap-2 text-muted-foreground mb-4">
-  <Mail className="w-4 h-4" />
-  <span className="text-sm break-all">{currentUser.email}</span>
-</div>
+              <div className="flex items-center gap-2 text-muted-foreground mb-4">
+                <Mail className="w-4 h-4" />
+                <span className="text-sm break-all">{profile.email}</span>
+              </div>
 
-<div className="space-y-2 mb-4">
+              <div className="space-y-2 mb-4">
+                {profile.phone && (
+                  <p className="text-sm">
+                    <strong>Telefone:</strong> {profile.phone}
+                  </p>
+                )}
 
-  {currentUser.phone && (
-    <p className="text-sm">
-      <strong>Telefone:</strong> {currentUser.phone}
-    </p>
-  )}
+                {profile.city && profile.state && (
+                  <p className="text-sm">
+                    <strong>Localização:</strong> {profile.city} - {profile.state}
+                  </p>
+                )}
 
-  {currentUser.city && currentUser.state && (
-    <p className="text-sm">
-      <strong>Localização:</strong> {currentUser.city} - {currentUser.state}
-    </p>
-  )}
+                {profile.role === 'NGO' && profile.bio && (
+                  <div>
+                    <p className="font-medium mb-1">Sobre a ONG</p>
+                    <p className="text-sm text-muted-foreground">{profile.bio}</p>
+                  </div>
+                )}
+              </div>
 
-  {currentUser.type === 'ngo' && currentUser.bio && (
-    <div>
-      <p className="font-medium mb-1">
-        Sobre a ONG
-      </p>
-
-      <p className="text-sm text-muted-foreground">
-        {currentUser.bio}
-      </p>
-    </div>
-  )}
-
-</div>
-
-{hasApprovedAdoption && currentUser.type === 'adopter' && (
+              {hasApprovedAdoption && profile.role === 'ADOPTER' && (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
                   <div className="flex items-center gap-2 text-green-700">
                     <CheckCircle className="w-5 h-5" />
@@ -166,47 +172,49 @@ const handleEditAnimal = (updatedAnimal: any) => {
                 </div>
               )}
 
-              {currentUser.type === 'adopter' && (
+              {profile.role === 'ADOPTER' && (
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-xl p-4 border border-orange-200">
                     <div className="flex items-center gap-2 text-orange-600 mb-1">
                       <Heart className="w-5 h-5" />
                       <span className="text-sm">Interesses</span>
                     </div>
-                    <p className="text-2xl md:text-3xl text-orange-700">{interests.length}</p>
+                    <p className="text-2xl md:text-3xl text-orange-700">
+                      {profile.stats.interests}
+                    </p>
                   </div>
                   <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-xl p-4 border border-pink-200">
                     <div className="flex items-center gap-2 text-pink-600 mb-1">
                       <CheckCircle className="w-5 h-5" />
                       <span className="text-sm">Adoções</span>
                     </div>
-                    <p className="text-2xl md:text-3xl text-pink-700">{approvedAdoptions.length}</p>
+                    <p className="text-2xl md:text-3xl text-pink-700">{profile.stats.adoptions}</p>
                   </div>
                 </div>
               )}
 
-              {currentUser.type === 'ngo' && (
+              {profile.role === 'NGO' && (
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
                     <div className="flex items-center gap-2 text-blue-600 mb-1">
                       <PawPrint className="w-5 h-5" />
                       <span className="text-sm">Disponíveis</span>
                     </div>
-                    <p className="text-2xl md:text-3xl text-blue-700">{availableNgoAnimals.length}</p>
+                    <p className="text-2xl md:text-3xl text-blue-700">{profile.stats.availableAnimals}</p>
                   </div>
                   <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200">
                     <div className="flex items-center gap-2 text-green-600 mb-1">
                       <CheckCircle className="w-5 h-5" />
                       <span className="text-sm">Adotados</span>
                     </div>
-                    <p className="text-2xl md:text-3xl text-green-700">{adoptedNgoAnimals.length}</p>
+                    <p className="text-2xl md:text-3xl text-green-700">{profile.stats.adoptedAnimals}</p>
                   </div>
                 </div>
               )}
             </div>
           </div>
 
-          {currentUser.type === 'ngo' && (
+          {profile.role === 'NGO' && (
             <button
               onClick={() => setIsAddModalOpen(true)}
               className="w-full py-4 rounded-xl bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg hover:shadow-xl transition-all hover:scale-[1.02] font-medium flex items-center justify-center gap-2"
@@ -217,52 +225,52 @@ const handleEditAnimal = (updatedAnimal: any) => {
           )}
         </div>
 
-        {currentUser.type === 'adopter' && adoptedAnimals.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-border">
-            <h2 className="text-2xl mb-4 flex items-center gap-2">
-              <CheckCircle className="w-6 h-6 text-green-500" />
-              Pets adotados
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              {adoptedAnimals.map(animal => (
-                <div key={animal.id} className="group relative aspect-square rounded-xl overflow-hidden border-2 border-green-200">
-                  <img
-                    src={animal.image}
-                    alt={animal.name}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform"
-                  />
-                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-3">
-  <div className="text-white">
-    <p className="font-medium">{animal.name}</p>
-    <p className="text-sm text-white/80">{animal.breed}</p>
-  </div>
-
-  <div className="flex gap-2 mt-3">
-    <button
-      onClick={() => {
-        setEditingAnimal(animal);
-        setIsAddModalOpen(true);
-      }}
-      className="flex-1 bg-blue-500 text-white py-1 rounded-lg text-sm"
-    >
-      Editar
-    </button>
-
-    <button
-      onClick={() => handleDeleteAnimal(animal.id)}
-      className="flex-1 bg-red-500 text-white py-1 rounded-lg text-sm"
-    >
-      Excluir
-    </button>
-  </div>
-</div>
-                </div>
-              ))}
+        {/* COMENTADO TEMPORARIAMENTE POIS adoptedAnimals NÃO EXISTE NO ESCOPO ATUAL
+          {profile.role === 'ADOPTER' && adoptedAnimals.length > 0 && (
+            <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-border">
+              <h2 className="text-2xl mb-4 flex items-center gap-2">
+                <CheckCircle className="w-6 h-6 text-green-500" />
+                Pets adotados
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {adoptedAnimals.map(animal => (
+                  <div key={animal.id} className="group relative aspect-square rounded-xl overflow-hidden border-2 border-green-200">
+                    <img
+                      src={animal.image}
+                      alt={animal.name}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex flex-col justify-end p-3">
+                      <div className="text-white">
+                        <p className="font-medium">{animal.name}</p>
+                        <p className="text-sm text-white/80">{animal.breed}</p>
+                      </div>
+                      <div className="flex gap-2 mt-3">
+                        <button
+                          onClick={() => {
+                            setEditingAnimal(animal);
+                            setIsAddModalOpen(true);
+                          }}
+                          className="flex-1 bg-blue-500 text-white py-1 rounded-lg text-sm"
+                        >
+                          Editar
+                        </button>
+                        <button
+                          onClick={() => handleDeleteAnimal(animal.id)}
+                          className="flex-1 bg-red-500 text-white py-1 rounded-lg text-sm"
+                        >
+                          Excluir
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )} 
+        */}
 
-        {currentUser.type === 'adopter' && interestedAnimals.length > 0 && (
+        {profile.role === 'ADOPTER' && interestedAnimals.length > 0 && (
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-border">
             <h2 className="text-2xl mb-4 flex items-center gap-2">
               <Heart className="w-6 h-6 text-orange-500" />
@@ -293,7 +301,7 @@ const handleEditAnimal = (updatedAnimal: any) => {
           </div>
         )}
 
-        {currentUser.type === 'adopter' && interestedAnimals.length === 0 && adoptedAnimals.length === 0 && (
+        {profile.role === 'ADOPTER' && interestedAnimals.length === 0 && (
           <div className="bg-white rounded-2xl shadow-lg p-12 text-center border border-border">
             <div className="text-6xl mb-4">🐾</div>
             <h3 className="text-xl mb-2">Nenhum interesse ainda</h3>
@@ -303,56 +311,51 @@ const handleEditAnimal = (updatedAnimal: any) => {
           </div>
         )}
 
-        {currentUser.type === 'ngo' && availableNgoAnimals.length > 0 && (
+        {profile.role === 'NGO' && profile.stats.availableAnimals > 0 && (
           <div className="bg-white rounded-2xl shadow-lg p-6 mb-6 border border-border">
             <h2 className="text-2xl mb-4 flex items-center gap-2">
               <PawPrint className="w-6 h-6 text-blue-500" />
               Animais disponíveis
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {availableNgoAnimals.map(animal => (
-  <div
-    key={animal.id}
-    className="rounded-xl overflow-hidden border border-border bg-white"
-  >
-    <img
-      src={animal.image}
-      alt={animal.name}
-      className="w-full h-48 object-cover"
-    />
-
-    <div className="p-3">
-      <p className="font-medium">{animal.name}</p>
-      <p className="text-sm text-muted-foreground">
-        {animal.breed}
-      </p>
-
-      <div className="flex gap-2 mt-3">
-        <button
-          onClick={() => {
-            setEditingAnimal(animal);
-            setIsAddModalOpen(true);
-          }}
-          className="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600"
-        >
-          Editar
-        </button>
-
-        <button
-          onClick={() => handleDeleteAnimal(animal.id)}
-          className="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600"
-        >
-          Excluir
-        </button>
-      </div>
-    </div>
-  </div>
-))}
+              {availableNgoAnimals.map(animal => (
+                <div
+                  key={animal.id}
+                  className="rounded-xl overflow-hidden border border-border bg-white"
+                >
+                  <img
+                    src={animal.image}
+                    alt={animal.name}
+                    className="w-full h-48 object-cover"
+                  />
+                  <div className="p-3">
+                    <p className="font-medium">{animal.name}</p>
+                    <p className="text-sm text-muted-foreground">{animal.breed}</p>
+                    <div className="flex gap-2 mt-3">
+                      <button
+                        onClick={() => {
+                          setEditingAnimal(animal);
+                          setIsAddModalOpen(true);
+                        }}
+                        className="flex-1 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        onClick={() => handleDeleteAnimal(animal.id)}
+                        className="flex-1 bg-red-500 text-white py-2 rounded-lg hover:bg-red-600"
+                      >
+                        Excluir
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         )}
 
-        {currentUser.type === 'ngo' && adoptedNgoAnimals.length > 0 && (
+        {profile.role === 'NGO' && adoptedNgoAnimals.length > 0 && (
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-border">
             <h2 className="text-2xl mb-4 flex items-center gap-2">
               <CheckCircle className="w-6 h-6 text-green-500" />
@@ -384,18 +387,17 @@ const handleEditAnimal = (updatedAnimal: any) => {
         )}
       </div>
 
-
       <AddAnimalModal
-  isOpen={isAddModalOpen}
-  onClose={() => {
-    setIsAddModalOpen(false);
-    setEditingAnimal(null);
-  }}
-  onAdd={handleAddAnimal}
-  onEdit={handleEditAnimal}
-  editingAnimal={editingAnimal}
-  currentUser={currentUser}
-/>
+        isOpen={isAddModalOpen}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setEditingAnimal(null);
+        }}
+        onAdd={handleAddAnimal}
+        onEdit={handleEditAnimal}
+        editingAnimal={editingAnimal}
+        currentUser={profile}
+      />
     </div>
   );
 }
