@@ -2,6 +2,7 @@ import { getProfile } from '../../services/user';
 import { useState, useEffect, useRef } from 'react';
 import { User, Mail, Heart, CheckCircle, Building2, PawPrint, Plus } from 'lucide-react';
 import { AddAnimalModal } from './AddAnimalModal';
+import { createAnimal } from '../../services/animal';
 
 interface ProfilePageProps {
   interests: string[];
@@ -65,17 +66,30 @@ export function ProfilePage({ interests }: ProfilePageProps) {
     const file = event.target.files?.[0];
     if (file) {
       console.log("Arquivo selecionado para upload:", file);
-      // Aqui você pode chamar a sua função de serviço do backend passando o arquivo:
-      // ex: await uploadAvatarService(file);
+      
     }
   };
 
-  const handleAddAnimal = (animal: any) => {
-    const updated = [...customAnimals, animal];
-    setCustomAnimals(updated);
-    localStorage.setItem('customAnimals', JSON.stringify(updated));
-  };
+ const handleAddAnimal = async (animal: any) => {
+  console.log("HANDLE ADD ANIMAL RECEBEU:", animal);
 
+  try {
+    const result = await createAnimal(animal);
+
+    console.log("POST REALIZADO:", result);
+
+    alert("Animal cadastrado com sucesso!");
+
+    setIsAddModalOpen(false);
+
+    window.location.reload();
+
+  } catch (error) {
+    console.error("ERRO AO CADASTRAR:", error);
+
+    alert("Erro ao cadastrar animal.");
+  }
+};
   const handleDeleteAnimal = (animalId: string) => {
     const updated = customAnimals.filter(
       animal => animal.id !== animalId
@@ -151,7 +165,6 @@ export function ProfilePage({ interests }: ProfilePageProps) {
                   <User className="w-12 h-12" />
                 )}
                 
-                {/* Overlay de hover indicando que é editável */}
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-full">
                   <span className="text-[10px] text-white font-semibold uppercase tracking-wider">Alterar</span>
                 </div>

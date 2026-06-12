@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, Upload, Plus } from 'lucide-react';
+import { createAnimal } from '../../services/animal';
 
 interface AddAnimalModalProps {
   isOpen: boolean;
@@ -62,41 +63,72 @@ useEffect(() => {
   });
 }, [editingAnimal]);
 
-const handleSubmit = (e: React.FormEvent) => {
+const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
-  if (editingAnimal) {
-    onEdit?.({
-      ...editingAnimal,
-      ...formData,
-    });
-  } else {
-    const newAnimal = {
-      id: Date.now().toString(),
-      ...formData,
-      ngoName: currentUser.name,
-      location: 'Brasil',
-      ngoId: currentUser.id,
+  try {
+    const backendAnimal = {
+      name: formData.name,
+
+      species:
+        formData.species === 'Cachorro'
+          ? 'DOG'
+          : formData.species === 'Gato'
+          ? 'CAT'
+          : 'OTHER',
+
+      breed: formData.breed,
+
+      age: formData.age
+        ? Number(formData.age)
+        : undefined,
+
+      gender:
+        formData.gender === 'Macho'
+          ? 'MALE'
+          : 'FEMALE',
+
+      size:
+        formData.size === 'Pequeno'
+          ? 'SMALL'
+          : formData.size === 'Grande'
+          ? 'LARGE'
+          : 'MEDIUM',
+
+      description: formData.description,
+
+      isVaccinated: formData.isVaccinated,
+
+      isNeutered: formData.isNeutered,
     };
 
-    onAdd(newAnimal);
+    if (editingAnimal) {
+      onEdit?.(backendAnimal);
+    } else {
+      await onAdd(backendAnimal);
+    }
+
+    setFormData({
+      name: '',
+      species: 'Cachorro',
+      breed: '',
+      age: '',
+      gender: 'Macho',
+      size: 'Médio',
+      description: '',
+      status: 'Disponível',
+      isVaccinated: false,
+      isNeutered: false,
+      image: null,
+    });
+
+    onClose();
+
+  } catch (error) {
+    console.error(error);
+
+    alert('Erro ao cadastrar animal.');
   }
-
-  setFormData({
-  name: '',
-  species: 'Cachorro',
-  breed: '',
-  age: '',
-  gender: 'Macho',
-  size: 'MEDIUM',
-  status: 'AVAILABLE',
-  isVaccinated: false,
-  isNeutered: false,
-  description: '',
-  image: null,
-});
-
-  onClose();
 };
 
   if (!isOpen) return null;

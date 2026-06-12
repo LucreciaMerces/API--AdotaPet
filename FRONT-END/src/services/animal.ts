@@ -58,3 +58,27 @@ export async function getAnimalById(id: string) {
 
   return result.data;
 }
+
+export async function createAnimal(data: any) {
+  const token = localStorage.getItem('token');
+
+  const response = await fetch(
+    'http://localhost:3333/api/v1/animals',
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message);
+  }
+
+  return result.data;
+}
