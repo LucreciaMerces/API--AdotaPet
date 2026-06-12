@@ -1,15 +1,21 @@
 import { useState, useEffect } from 'react';
 import { getAnimals } from '../../services/animal';
-import { Search, Filter, SlidersHorizontal } from 'lucide-react';
+import { Search, SlidersHorizontal } from 'lucide-react';
 import { AnimalCard } from './AnimalCard';
 
 interface FeedPageProps {
   currentUser: any;
   onInterest: (animalId: string) => void;
   interests: string[];
+  onOpenAnimal: (animalId: string) => void;
 }
 
-export function FeedPage({ currentUser, onInterest, interests }: FeedPageProps) {
+export function FeedPage({
+  currentUser,
+  onInterest,
+  interests,
+  onOpenAnimal,
+}: FeedPageProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterSpecies, setFilterSpecies] = useState<'all' | 'Cachorro' | 'Gato'>('all');
   const [showFilters, setShowFilters] = useState(false);
@@ -20,9 +26,7 @@ export function FeedPage({ currentUser, onInterest, interests }: FeedPageProps) 
       try {
         const data = await getAnimals(
           searchTerm,
-          filterSpecies === 'all'
-            ? undefined
-            : filterSpecies
+          filterSpecies === 'all' ? undefined : filterSpecies
         );
         setAnimals(data);
       } catch (error) {
@@ -106,12 +110,21 @@ export function FeedPage({ currentUser, onInterest, interests }: FeedPageProps) 
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {filteredAnimals.map(animal => (
-            <AnimalCard
-              key={animal.id}
-              animal={animal}
-              onInterest={onInterest}
-              hasInterest={interests.includes(animal.id)}
-            />
+  // antes estava: <div key={animal.id} onClick={() => onOpenAnimal(animal.id)}className="cursor-pointer">
+           <div
+  key={animal.id}
+  onClick={() => {
+    console.log("CLIQUE NO CARD", animal.id);
+    onOpenAnimal(animal.id);
+  }}
+  className="cursor-pointer"
+>
+              <AnimalCard
+                animal={animal}
+                onInterest={onInterest}
+                hasInterest={interests.includes(animal.id)}
+              />
+            </div>
           ))}
         </div>
 

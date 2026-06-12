@@ -6,40 +6,38 @@ import { FeedPage } from './components/FeedPage';
 import { ProfilePage } from './components/ProfilePage';
 import { ChatPage } from './components/ChatPage';
 import { AdoptionRequests } from './components/AdoptionRequests';
-type Page = 'feed' | 'profile' | 'chat' | 'requests';
+import { AnimalDetailsPage } from './components/AnimalDetailsPage';
+
+type Page =
+  | 'feed'
+  | 'profile'
+  | 'chat'
+  | 'requests'
+  | 'animal-details';
 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState<Page>('feed');
   const [interests, setInterests] = useState<string[]>([]);
   const [chatWith, setChatWith] = useState<string | null>(null);
+  const [selectedAnimalId, setSelectedAnimalId] = useState<string | null>(null);
 
   useEffect(() => {
-  async function loadUser() {
+    async function loadUser() {
+      const token = localStorage.getItem('token');
+      if (!token) return;
 
-    const token =
-      localStorage.getItem('token');
-
-    if (!token) return;
-
-    try {
-
-      const user =
-        await getMe();
-
-      setCurrentUser(user);
-
-    } catch (error) {
-
-      localStorage.removeItem('token');
-      localStorage.removeItem('currentUser');
-
-      console.error(error);
+      try {
+        const user = await getMe();
+        setCurrentUser(user);
+      } catch (error) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('currentUser');
+        console.error(error);
+      }
     }
-  }
-
-  loadUser();
-}, []);
+    loadUser();
+  }, []);
 
   useEffect(() => {
     if (currentUser) {
@@ -62,32 +60,61 @@ export default function App() {
     }
   };
 
- const handleLogout = () => {
-  setCurrentUser(null);
+  const handleLogout = () => {
+    setCurrentUser(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('currentUser');
+    setCurrentPage('feed');
+  };
 
-  localStorage.removeItem('token');
-  localStorage.removeItem('currentUser');
-
-  setCurrentPage('feed');
-};
-
+  // Alteração aplicada: Função handleInterest corrigida e unificada
   const handleInterest = (animalId: string) => {
     if (interests.includes(animalId)) return;
 
     const updated = [...interests, animalId];
     setInterests(updated);
-    localStorage.setItem(`interests_${currentUser.id}`, JSON.stringify(updated));
 
-    const requests = JSON.parse(localStorage.getItem('adoptionRequests') || '[]');
+    localStorage.setItem(
+      `interests_${currentUser.id}`,
+      JSON.stringify(updated)
+    );
+
+    const requests = JSON.parse(
+      localStorage.getItem('adoptionRequests') || '[]'
+    );
+
     const MOCK_ANIMALS = [
-      { id: '1', name: 'Mel', image: 'https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=400' },
-      { id: '2', name: 'Thor', image: 'https://images.unsplash.com/photo-1568572933382-74d440642117?w=400' },
-      { id: '3', name: 'Luna', image: 'https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?w=400' },
-      { id: '4', name: 'Bob', image: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400' },
-      { id: '5', name: 'Mia', image: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=400' },
+      {
+        id: '1',
+        name: 'Mel',
+        image: 'https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=400',
+      },
+      {
+        id: '2',
+        name: 'Thor',
+        image: 'https://images.unsplash.com/photo-1568572933382-74d440642117?w=400',
+      },
+      {
+        id: '3',
+        name: 'Luna',
+        image: 'https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?w=400',
+      },
+      {
+        id: '4',
+        name: 'Bob',
+        image: 'https://images.unsplash.com/photo-1587300003388-59208cc962cb?w=400',
+      },
+      {
+        id: '5',
+        name: 'Mia',
+        image: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=400',
+      },
     ];
 
-    const animal = MOCK_ANIMALS.find(a => a.id === animalId);
+    const animal = MOCK_ANIMALS.find(
+      a => a.id === animalId
+    );
+
     if (animal) {
       requests.push({
         id: Date.now().toString(),
@@ -99,8 +126,19 @@ export default function App() {
         adopterEmail: currentUser.email,
         status: 'pending',
       });
-      localStorage.setItem('adoptionRequests', JSON.stringify(requests));
+
+      localStorage.setItem(
+        'adoptionRequests',
+        JSON.stringify(requests)
+      );
     }
+  };
+
+  // Alteração aplicada: Função handleOpenAnimal organizada
+  const handleOpenAnimal = (animalId: string) => {
+    console.log("Abrir animal:", animalId);
+    setSelectedAnimalId(animalId);
+    setCurrentPage("animal-details");
   };
 
   if (!currentUser) {
@@ -190,6 +228,7 @@ export default function App() {
             currentUser={currentUser}
             onInterest={handleInterest}
             interests={interests}
+            onOpenAnimal={handleOpenAnimal}
           />
         )}
         {currentPage === 'profile' && (
@@ -207,6 +246,13 @@ export default function App() {
             }}
           />
         )}
+
+      {currentPage === 'animal-details' && selectedAnimalId && (
+  <AnimalDetailsPage
+    animalId={selectedAnimalId}
+    onBack={() => setCurrentPage('feed')}
+  />
+)}
       </main>
     </div>
   );

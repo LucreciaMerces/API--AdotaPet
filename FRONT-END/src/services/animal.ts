@@ -1,3 +1,4 @@
+
 const API_URL = 'http://localhost:3333/api/v1';
 
 export async function getAnimals(
@@ -5,14 +6,12 @@ export async function getAnimals(
   species?: string
 ) {
   const token = localStorage.getItem('token');
-
   const params = new URLSearchParams();
 
   if (search) {
     params.append('search', search);
   }
 
- 
   if (species === 'Cachorro') {
     params.append('species', 'DOG');
   }
@@ -23,6 +22,27 @@ export async function getAnimals(
 
   const response = await fetch(
     `${API_URL}/animals?${params.toString()}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message);
+  }
+
+  return result.data;
+}
+
+export async function getAnimalById(id: string) {
+  const token = localStorage.getItem('token');
+
+  const response = await fetch(
+    `${API_URL}/animals/${id}`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
