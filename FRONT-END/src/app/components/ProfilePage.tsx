@@ -1,8 +1,9 @@
-import { getProfile } from '../../services/user';
 import { useState, useEffect, useRef } from 'react';
 import { User, Mail, Heart, CheckCircle, Building2, PawPrint, Plus } from 'lucide-react';
 import { AddAnimalModal } from './AddAnimalModal';
 import { createAnimal } from '../../services/animal';
+import { getProfile } from '../../services/user';
+import { getAnimals } from '../../services/animal';
 
 interface ProfilePageProps {
   interests: string[];
@@ -52,7 +53,7 @@ export function ProfilePage({ interests }: ProfilePageProps) {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const ngoAnimals: any[] = []; 
+  const [ngoAnimals, setNgoAnimals] = useState<any[]>([]);
 
   const interestedAnimals = MOCK_ANIMALS.filter(animal =>
     interests.includes(animal.id)
@@ -111,7 +112,17 @@ export function ProfilePage({ interests }: ProfilePageProps) {
     async function loadProfile() {
       try {
         const data = await getProfile();
+        console.log('PROFILE:', data);
         setProfile(data);
+        const animals = await getAnimals();
+        console.log('TODOS OS ANIMAIS:', animals);
+
+        const myAnimals = animals.filter(
+          (animal: any) => animal.ngoId === data.id
+);
+        console.log('ID DA ONG:', data.id);
+        console.log('ANIMAIS DA ONG:', myAnimals);
+       setNgoAnimals(myAnimals);
       } catch (error) {
         console.error(error);
       }

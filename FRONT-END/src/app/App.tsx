@@ -67,7 +67,7 @@ export default function App() {
     setCurrentPage('feed');
   };
 
-  // Alteração aplicada: Função handleInterest corrigida e unificada
+ 
   const handleInterest = (animalId: string) => {
     if (interests.includes(animalId)) return;
 
