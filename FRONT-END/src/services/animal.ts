@@ -108,3 +108,29 @@ export async function updateAnimal(
 
   return result.data;
 }
+export async function deleteAnimal(animalId: string) {
+  const token = localStorage.getItem('token');
+
+  const response = await fetch(
+    `${API_URL}/animals/${animalId}`,
+    {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  if (!response.ok) {
+    let message = 'Erro ao excluir animal.';
+
+    try {
+      const result = await response.json();
+      message = result.message || message;
+    } catch {
+      // ignora caso a resposta não tenha corpo
+    }
+
+    throw new Error(message);
+  }
+}

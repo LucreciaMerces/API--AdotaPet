@@ -6,10 +6,8 @@ import { getProfile } from '../../services/user';
 import {
   getAnimals,
   updateAnimal,
+  deleteAnimal,
 } from '../../services/animal';
-interface ProfilePageProps {
-  interests: string[];
-}
 
 const MOCK_ANIMALS = [
   {
@@ -93,13 +91,20 @@ export function ProfilePage({ interests }: ProfilePageProps) {
     alert("Erro ao cadastrar animal.");
   }
 };
-  const handleDeleteAnimal = (animalId: string) => {
-    const updated = customAnimals.filter(
-      animal => animal.id !== animalId
+ const handleDeleteAnimal = async (animalId: string) => {
+  try {
+    await deleteAnimal(animalId);
+
+    setNgoAnimals(prev =>
+      prev.filter(animal => animal.id !== animalId)
     );
-    setCustomAnimals(updated);
-    localStorage.setItem('customAnimals', JSON.stringify(updated));
-  };
+
+  } catch (error) {
+    console.error(error);
+
+    alert('Erro ao excluir animal.');
+  }
+};
 
  const handleEditAnimal = async (updatedAnimal: any) => {
  console.log("ANIMAL RECEBIDO:", updatedAnimal);
