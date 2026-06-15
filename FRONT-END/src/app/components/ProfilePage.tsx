@@ -2,7 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { User, Mail, Heart, CheckCircle, Building2, PawPrint, Plus } from 'lucide-react';
 import { AddAnimalModal } from './AddAnimalModal';
 import { createAnimal } from '../../services/animal';
-import { getProfile } from '../../services/user';
+import {
+  getProfile,
+  uploadAvatar,
+} from '../../services/user';
+
 import {
   getAnimals,
   updateAnimal,
@@ -63,14 +67,30 @@ export function ProfilePage({ interests }: ProfilePageProps) {
   const availableNgoAnimals = ngoAnimals.filter(a => !adoptedAnimalsIds.includes(a.id));
   const adoptedNgoAnimals = ngoAnimals.filter(a => adoptedAnimalsIds.includes(a.id));
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      console.log("Arquivo selecionado para upload:", file);
-      
-    }
-  };
+ const handleFileChange = async (
+  event: React.ChangeEvent<HTMLInputElement>
+) => {
+  const file = event.target.files?.[0];
 
+  if (!file) return;
+
+  try {
+    const updatedUser = await uploadAvatar(file);
+
+    console.log("RESPOSTA DO UPLOAD:", updatedUser);
+
+    setProfile((previousProfile: any) => ({
+      ...previousProfile,
+      ...updatedUser,
+    }));
+
+    alert('Foto atualizada com sucesso!');
+  } catch (error) {
+    console.error(error);
+
+    alert('Erro ao atualizar foto.');
+  }
+};
  const handleAddAnimal = async (animal: any) => {
   console.log("HANDLE ADD ANIMAL RECEBEU:", animal);
 
