@@ -3,8 +3,10 @@ import { User, Mail, Heart, CheckCircle, Building2, PawPrint, Plus } from 'lucid
 import { AddAnimalModal } from './AddAnimalModal';
 import { createAnimal } from '../../services/animal';
 import { getProfile } from '../../services/user';
-import { getAnimals } from '../../services/animal';
-
+import {
+  getAnimals,
+  updateAnimal,
+} from '../../services/animal';
 interface ProfilePageProps {
   interests: string[];
 }
@@ -99,14 +101,36 @@ export function ProfilePage({ interests }: ProfilePageProps) {
     localStorage.setItem('customAnimals', JSON.stringify(updated));
   };
 
-  const handleEditAnimal = (updatedAnimal: any) => {
-    const updated = customAnimals.map(animal =>
-      animal.id === updatedAnimal.id ? updatedAnimal : animal
+ const handleEditAnimal = async (updatedAnimal: any) => {
+ console.log("ANIMAL RECEBIDO:", updatedAnimal);
+
+  try {
+    await updateAnimal(
+      updatedAnimal.id,
+      updatedAnimal
     );
-    setCustomAnimals(updated);
-    localStorage.setItem('customAnimals', JSON.stringify(updated));
+
+    const animals = await getAnimals();
+
+    const ngoAnimals = animals.filter(
+      (animal: any) =>
+        animal.ngoId === profile.id
+    );
+
+    setCustomAnimals(ngoAnimals);
+
     setEditingAnimal(null);
-  };
+
+    setIsAddModalOpen(false);
+
+  } catch (error) {
+    console.error(error);
+
+    alert(
+      'Erro ao atualizar animal.'
+    );
+  }
+};
 
   useEffect(() => {
     async function loadProfile() {

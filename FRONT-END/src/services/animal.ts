@@ -82,3 +82,29 @@ export async function createAnimal(data: any) {
 
   return result.data;
 }
+export async function updateAnimal(
+  animalId: string,
+  animalData: any
+) {
+  const token = localStorage.getItem('token');
+
+  const response = await fetch(
+    `${API_URL}/animals/${animalId}`,
+    {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(animalData),
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message);
+  }
+
+  return result.data;
+}

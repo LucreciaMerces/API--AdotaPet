@@ -45,21 +45,42 @@ useEffect(() => {
 
   setFormData({
     name: editingAnimal.name || '',
-    species: editingAnimal.species || 'Cachorro',
-    breed: editingAnimal.breed || '',
-    age: editingAnimal.age || '',
 
-    gender: editingAnimal.gender || 'Macho',
-    size: editingAnimal.size || 'Médio',
+    species:
+      editingAnimal.species === 'DOG'
+        ? 'Cachorro'
+        : 'Gato',
+
+    breed: editingAnimal.breed || '',
+
+    age: editingAnimal.age?.toString() || '',
+
+    gender:
+      editingAnimal.gender === 'MALE'
+        ? 'Macho'
+        : 'Fêmea',
+
+    size:
+      editingAnimal.size === 'SMALL'
+        ? 'Pequeno'
+        : editingAnimal.size === 'MEDIUM'
+        ? 'Médio'
+        : 'Grande',
 
     description: editingAnimal.description || '',
 
-    status: editingAnimal.status || 'Disponível',
+    status:
+      editingAnimal.status === 'AVAILABLE'
+        ? 'Disponível'
+        : editingAnimal.status === 'PENDING'
+        ? 'Pendente'
+        : 'Adotado',
 
-    isVaccinated: editingAnimal.isVaccinated || false,
-    isNeutered: editingAnimal.isNeutered || false,
+    isVaccinated: editingAnimal.isVaccinated,
 
-    image: editingAnimal.image || null,
+    isNeutered: editingAnimal.isNeutered,
+
+    image: null,
   });
 }, [editingAnimal]);
 
@@ -101,12 +122,18 @@ const handleSubmit = async (e: React.FormEvent) => {
 
       isNeutered: formData.isNeutered,
     };
+    
+   if (editingAnimal) {
+  console.log('ENVIANDO PARA onEdit:', {
+    ...backendAnimal,
+    id: editingAnimal.id,
+  });
 
-    if (editingAnimal) {
-      onEdit?.(backendAnimal);
-    } else {
-      await onAdd(backendAnimal);
-    }
+  onEdit?.({
+    ...backendAnimal,
+    id: editingAnimal.id,
+  });
+}
 
     setFormData({
       name: '',
