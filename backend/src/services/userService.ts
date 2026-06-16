@@ -7,6 +7,7 @@ interface AdopterProfile {
   id: string;
   name: string;
   email: string;
+  avatarUrl?: string | null;
   role: "ADOPTER";
   stats: {
     interests: number;   
@@ -18,6 +19,7 @@ interface NgoProfile {
   id: string;
   name: string;
   email: string;
+  avatarUrl?: string | null;
   role: "NGO";
   stats: {
     availableAnimals: number;
@@ -47,6 +49,7 @@ export const userService = {
         id: user.id,
         name: user.name,
         email: user.email,
+        avatarUrl: user.avatarUrl,
         role: "ADOPTER",
         stats: { interests, adoptions },
       };
@@ -62,6 +65,7 @@ export const userService = {
       id: user.id,
       name: user.name,
       email: user.email,
+      avatarUrl: user.avatarUrl,
       role: "NGO",
       stats: { availableAnimals, adoptedAnimals },
     };

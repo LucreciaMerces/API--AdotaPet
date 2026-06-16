@@ -11,6 +11,7 @@ export const userRepository = {
         id: true,
         name: true,
         email: true,
+        avatarUrl: true,
         role: true,
       },
     });
