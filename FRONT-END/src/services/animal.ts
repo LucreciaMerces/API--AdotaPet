@@ -35,6 +35,7 @@ export async function getAnimals(
     throw new Error(result.message);
   }
 
+  console.log("ANIMAIS RECEBIDOS DO BACKEND:", result.data);
   return result.data;
 }
 
@@ -133,4 +134,33 @@ export async function deleteAnimal(animalId: string) {
 
     throw new Error(message);
   }
+}
+export async function uploadAnimalImage(
+  animalId: string,
+  image: File
+) {
+  const token = localStorage.getItem('token');
+
+  const formData = new FormData();
+
+  formData.append('image', image);
+
+  const response = await fetch(
+    `${API_URL}/animals/${animalId}/images`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: formData,
+    }
+  );
+
+  const result = await response.json();
+
+  if (!response.ok) {
+    throw new Error(result.message);
+  }
+
+  return result.data;
 }

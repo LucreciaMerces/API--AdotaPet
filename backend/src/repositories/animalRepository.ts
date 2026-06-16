@@ -26,6 +26,13 @@ const animalWithNgo = {
       state: true,
     },
   },
+  images: {
+  select: {
+    id: true,
+    url: true,
+    isPrimary: true,
+  },
+},
 } as const;
 
 export interface FindAllOptions {

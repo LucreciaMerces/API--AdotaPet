@@ -21,21 +21,49 @@ export function FeedPage({
   const [showFilters, setShowFilters] = useState(false);
   const [animals, setAnimals] = useState<any[]>([]);
 
-  useEffect(() => {
-    async function loadAnimals() {
-      try {
-        const data = await getAnimals(
-          searchTerm,
-          filterSpecies === 'all' ? undefined : filterSpecies
-        );
-        setAnimals(data);
-      } catch (error) {
-        console.error('Erro ao carregar animais:', error);
-      }
-    }
+  
+useEffect(() => {
+  async function loadAnimals() {
+    try {
+      const data = await getAnimals(
+        searchTerm,
+        filterSpecies === 'all' ? undefined : filterSpecies
+      );
 
-    loadAnimals();
-  }, [searchTerm, filterSpecies]);
+      const formattedAnimals = data.map((animal: any) => ({
+        ...animal,
+
+        image:
+          animal.images?.find((img: any) => img.isPrimary)?.url ||
+          animal.images?.[0]?.url ||
+          "https://via.placeholder.com/400x400?text=Sem+Imagem",
+
+        age: animal.age
+          ? `${animal.age} meses`
+          : "Idade não informada",
+
+        breed: animal.breed || "Sem raça definida",
+
+        ngoName: animal.ngo?.name || "ONG",
+
+        location:
+          `${animal.ngo?.city || ""}${
+            animal.ngo?.city && animal.ngo?.state ? " - " : ""
+          }${animal.ngo?.state || ""}`,
+      }));
+
+      console.log("ANIMAIS FORMATADOS:", formattedAnimals);
+
+      setAnimals(formattedAnimals);
+
+    } catch (error) {
+      console.error('Erro ao carregar animais:', error);
+    }
+  }
+
+  loadAnimals();
+}, [searchTerm, filterSpecies]);
+
 
   const filteredAnimals = animals;
 

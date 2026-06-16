@@ -11,7 +11,12 @@ import {
   getAnimals,
   updateAnimal,
   deleteAnimal,
+  uploadAnimalImage,
 } from '../../services/animal';
+
+interface ProfilePageProps {
+  interests: string[];
+}
 
 const MOCK_ANIMALS = [
   {
@@ -46,7 +51,7 @@ const MOCK_ANIMALS = [
   },
 ];
 
-export function ProfilePage({ interests }: ProfilePageProps) {
+  export function ProfilePage({ interests }: ProfilePageProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [profile, setProfile] = useState<any>(null);
   const [editingAnimal, setEditingAnimal] = useState<any>(null);
@@ -91,20 +96,31 @@ export function ProfilePage({ interests }: ProfilePageProps) {
     alert('Erro ao atualizar foto.');
   }
 };
- const handleAddAnimal = async (animal: any) => {
+  const handleAddAnimal = async (
+  animal: any,
+  image?: File | null
+) => {
   console.log("HANDLE ADD ANIMAL RECEBEU:", animal);
 
   try {
-    const result = await createAnimal(animal);
+     const result = await createAnimal(animal);
 
-    console.log("POST REALIZADO:", result);
+console.log("POST REALIZADO:", result);
 
-    alert("Animal cadastrado com sucesso!");
+if (image) {
+  await uploadAnimalImage(
+    result.id,
+    image
+  );
 
-    setIsAddModalOpen(false);
+  console.log("IMAGEM ENVIADA!");
+}
 
-    window.location.reload();
+alert("Animal cadastrado com sucesso!");
 
+setIsAddModalOpen(false);
+
+window.location.reload();
   } catch (error) {
     console.error("ERRO AO CADASTRAR:", error);
 

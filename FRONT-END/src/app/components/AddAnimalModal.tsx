@@ -5,7 +5,7 @@ import { createAnimal } from '../../services/animal';
 interface AddAnimalModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (animal: any) => void;
+  onAdd: (animal: any, image?: File | null) => Promise<void>;
   onEdit?: (animal: any) => void;
   editingAnimal?: any;
   currentUser: any;
@@ -133,6 +133,11 @@ const handleSubmit = async (e: React.FormEvent) => {
     ...backendAnimal,
     id: editingAnimal.id,
   });
+} else {
+  await onAdd(
+    backendAnimal,
+    formData.image
+  );
 }
 
     setFormData({
