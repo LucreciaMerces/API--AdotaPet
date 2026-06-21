@@ -226,32 +226,33 @@ window.location.reload();
               />
               <label 
                 htmlFor="avatar-upload"
-                className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-500 to-pink-500 flex items-center justify-center text-white cursor-pointer shadow-md hover:shadow-lg hover:brightness-110 transition-all relative overflow-hidden block"
-                title="Clique para alterar a foto"
+                className="cursor-pointer block w-24 h-24 md:w-32 md:h-32 rounded-full overflow-hidden border-4 border-white shadow-lg relative group"
               >
-                {profile.avatarUrl ? (
-                  <img 
-                    src={profile.avatarUrl} 
-                    alt="Avatar" 
-                    className="w-full h-full object-cover rounded-full"
+                {profile.avatar ? (
+                  <img
+                    src={profile.avatar}
+                    alt={profile.name}
+                    className="w-full h-full object-cover"
                   />
-                ) : profile.role === 'NGO' ? (
-                  <Building2 className="w-12 h-12" />
                 ) : (
-                  <User className="w-12 h-12" />
+                  <div className="w-full h-full bg-gradient-to-br from-orange-400 to-pink-400 flex items-center justify-center text-white text-3xl font-bold">
+                    {profile.name?.charAt(0)}
+                  </div>
                 )}
-                
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-full">
-                  <span className="text-[10px] text-white font-semibold uppercase tracking-wider">Alterar</span>
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                  <span className="text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                    Alterar foto
+                  </span>
                 </div>
               </label>
             </div>
 
-            <div className="flex-1 w-full">
-              <div className="flex flex-wrap items-center gap-3 mb-2">
-                <h1 className="text-2xl md:text-3xl">{profile.name}</h1>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                <h1 className="text-2xl md:text-3xl truncate">{profile.name}</h1>
                 {profile.role === 'NGO' && (
-                  <span className="px-3 py-1 rounded-full bg-pink-100 text-pink-700 text-sm">
+                  <span className="px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-sm flex items-center gap-1">
+                    <Building2 className="w-3 h-3" />
                     ONG
                   </span>
                 )}
@@ -406,7 +407,11 @@ window.location.reload();
                   className="rounded-xl overflow-hidden border border-border bg-white"
                 >
                   <img
-                    src={animal.image}
+                    src={
+                      animal.images?.find((img: any) => img.isPrimary)?.url ||
+                      animal.images?.[0]?.url ||
+                      "https://via.placeholder.com/400x400?text=Sem+Imagem"
+                    }
                     alt={animal.name}
                     className="w-full h-48 object-cover"
                   />
@@ -447,7 +452,11 @@ window.location.reload();
               {adoptedNgoAnimals.map(animal => (
                 <div key={animal.id} className="group relative aspect-square rounded-xl overflow-hidden border-2 border-green-200">
                   <img
-                    src={animal.image}
+                    src={
+                      animal.images?.find((img: any) => img.isPrimary)?.url ||
+                      animal.images?.[0]?.url ||
+                      "https://via.placeholder.com/400x400?text=Sem+Imagem"
+                    }
                     alt={animal.name}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform"
                   />
