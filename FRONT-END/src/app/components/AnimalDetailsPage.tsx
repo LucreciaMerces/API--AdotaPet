@@ -63,13 +63,15 @@ export function AnimalDetailsPage({
 
           <div className="w-full h-80 bg-gray-100 flex items-center justify-center">
 
-            {animal.imageUrl && (
-              <img
-                src={animal.imageUrl}
-                alt={animal.name}
-                className="w-full h-full object-cover"
-              />
-            )}
+            <img
+              src={
+                animal.images?.find((img: any) => img.isPrimary)?.url ||
+                animal.images?.[0]?.url ||
+                "https://via.placeholder.com/400x400?text=Sem+Imagem"
+              }
+              alt={animal.name}
+              className="w-full h-full object-cover"
+            />
 
           </div>
 
